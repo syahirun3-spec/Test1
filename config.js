@@ -6,7 +6,7 @@
 
 window.ONECORD_CONFIG = {
   // Your deployed Node.js backend URL
-  API_BASE_URL: "https://test1-4a7v.onrender.com",
+  API_BASE_URL: "https://syahirun3-spec.github.io/Test1/",
 
   // API endpoints
   CHAT_ENDPOINT: "/api/chat",
