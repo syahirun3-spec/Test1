@@ -1,53 +1,34 @@
-# Onecord-inspired interface
+# Onecord-inspired website + Discord OAuth backend
 
-A responsive static frontend inspired by the screenshots supplied in the conversation. It includes a landing composer, server picker, plugin popover, model-level selector, sidebar navigation, image-template gallery, and a configurable API client.
+## Files
+- `index.html`, `styles.css`, `app.js`: responsive frontend and animations
+- `config.js`: public backend URL (no secrets)
+- `server.js`: Node.js API and Discord OAuth2 backend
+- `.env.example`: environment variable template
 
-## Folder structure
+## Run the backend locally
+1. Install Node.js 20 or newer.
+2. Copy `.env.example` to `.env` and fill in the Discord OAuth application values.
+3. Run `npm install`, then `npm start`.
+4. Set `FRONTEND_ORIGIN` to the exact origin serving the frontend. For local testing, a static server such as Acode preview or `http://localhost:5500` can be used.
+5. Set `API_BASE_URL` in `config.js` to your backend origin.
 
-```text
-onecord-inspired/
-├── index.html
-├── styles.css
-├── app.js
-├── config.js
-└── assets/
-```
+## Configure Discord OAuth
+1. Open the Discord Developer Portal and create/select an application.
+2. In OAuth2, add the exact redirect URL from `DISCORD_REDIRECT_URI`, e.g. `https://your-backend.example.com/auth/callback`.
+3. Copy the Client ID and Client Secret into backend environment variables. Never put the client secret or bot token in frontend files or GitHub.
+4. Deploy `server.js` on a Node-capable host such as Render. Set `NODE_ENV=production`, `SESSION_SECRET` to a long random value, `FRONTEND_ORIGIN` to your published GitHub Pages origin, and the Discord OAuth variables.
+5. If frontend and backend use different sites, both must use HTTPS for the session cookie to work. Some browsers block third-party cookies; a same-site custom domain or reverse proxy may be needed.
 
-## Run it locally
+## What works
+- Discord OAuth login with `identify guilds` scopes.
+- Personalized, rotating welcome message after login.
+- Server picker populated from Discord; currently filters to servers where the signed-in user has Manage Server or Administrator.
+- Animated three-dot AI thinking indicator while waiting for API response.
+- Logout and session check.
 
-Open `index.html` in a browser, or use a local static server. It is also suitable for GitHub Pages.
-
-## Connect an API
-
-Edit `config.js` and set `API_BASE_URL` to your backend's public URL:
-
-```js
-window.ONECORD_CONFIG = {
-  API_BASE_URL: "https://your-backend.example.com",
-  CHAT_ENDPOINT: "/api/chat",
-  STATUS_ENDPOINT: "/api/status"
-};
-```
-
-The chat endpoint should accept `POST /api/chat` with JSON such as:
-
-```json
-{
-  "message": "Summarize the community's recent activity",
-  "server": "Example Discord server",
-  "model": "GPT-6 Luna",
-  "level": "Low"
-}
-```
-
-It should respond with JSON containing a string `reply`, for example `{ "reply": "Here is the summary..." }`. The optional status endpoint should return JSON such as `{ "status": "online" }`.
-
-The static frontend does not include Discord OAuth, actual server discovery, plugin installation, or image generation. Add those through a trusted backend. **Never put a Discord bot token or private API key in `config.js`, `app.js`, or any other file deployed to GitHub Pages.** Configure CORS on your backend to permit your published site origin.
-
-## Publish with GitHub Pages
-
-1. Create a GitHub repository.
-2. Upload the files inside this folder (so `index.html` is at the repository root).
-3. Open **Settings → Pages**.
-4. Select **Deploy from a branch**, choose the default branch and `/(root)`, then save.
-5. Wait for GitHub Pages to publish the site. The API can be hosted separately, such as on Render.
+## Important limitations
+- `/api/chat` is a safe placeholder, not an AI model. Add an AI provider server-side to generate real responses.
+- This starter lists servers the user can manage. It does not install your bot or change server settings. Those actions require bot installation, permission checks, and specific bot API endpoints.
+- The default Express session store is in-memory and suitable only for initial testing. For production, use a persistent session store and HTTPS.
+- GitHub Pages only hosts the static frontend; it cannot run `server.js`.
